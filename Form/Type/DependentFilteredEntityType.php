@@ -40,7 +40,13 @@ class DependentFilteredEntityType extends AbstractType
             'choice_translation_domain' => false,
             'choice_title_translation_part' => null,
             'callback_parameters' => [],
+            'class' => '',
         ));
+        $resolver->setNormalizer('class', function(OptionsResolver $resolver, $value)
+        {
+            $entities = $this->container->getParameter('dependent_select.dependent_filtered_entities');
+            return $entities[$resolver->offsetGet('entity_alias')]['class'];
+        });
     }
 
     /**
@@ -48,7 +54,7 @@ class DependentFilteredEntityType extends AbstractType
      */
     public function getParent()
     {
-        return 'form';
+        return 'entity';
     }
 
     /**
@@ -62,11 +68,6 @@ class DependentFilteredEntityType extends AbstractType
         $options['property'] = $entities[$options['entity_alias']]['property'];
 
         $options['no_result_msg'] = $entities[$options['entity_alias']]['no_result_msg'];
-
-        $builder->addViewTransformer(new EntityToIdTransformer(
-            $this->container->get('doctrine')->getManager(),
-            $options['class']
-        ), true);
 
         $builder->setAttribute('parent_field', $options['parent_field']);
         $builder->setAttribute('fallback_parent_field', $options['fallback_parent_field']);
