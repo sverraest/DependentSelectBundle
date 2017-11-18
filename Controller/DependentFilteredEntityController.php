@@ -2,11 +2,16 @@
 
 namespace Evercode\DependentSelectBundle\Controller;
 
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
+use InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use function GuzzleHttp\json_decode;
+use function GuzzleHttp\json_encode;
 
 class DependentFilteredEntityController extends Controller
 {
@@ -15,9 +20,8 @@ class DependentFilteredEntityController extends Controller
     /**
      * @return Response
      */
-    public function getOptionsAction()
+    public function getOptionsAction(Request $request)
     {
-        $request = $this->getRequest();
         $translator = $this->get('translator');
 
         $entity_alias = $request->get('entity_alias');
@@ -43,7 +47,7 @@ class DependentFilteredEntityController extends Controller
         }
 
         if ($entity_inf['role'] !== 'IS_AUTHENTICATED_ANONYMOUSLY') {
-            if (false === $this->get('security.context')->isGranted($entity_inf['role'])) {
+            if (false === $this->get('security.authorization_checker')->isGranted($entity_inf['role'])) {
                 throw new AccessDeniedException();
             }
         }
@@ -115,7 +119,7 @@ class DependentFilteredEntityController extends Controller
             $repository = $qb->getEntityManager()->getRepository($entity_inf['class']);
 
             if (!method_exists($repository, $entity_inf['callback'])) {
-                throw new \InvalidArgumentException(sprintf('Callback function "%s" in Repository "%s" does not exist.', $entity_inf['callback'], get_class($repository)));
+                throw new InvalidArgumentException(sprintf('Callback function "%s" in Repository "%s" does not exist.', $entity_inf['callback'], get_class($repository)));
             }
 
             //dql callback starts here
@@ -180,7 +184,7 @@ class DependentFilteredEntityController extends Controller
      */
     public function getJSONAction()
     {
-        /** @var \Doctrine\ORM\EntityManager $em */
+        /** @var EntityManager $em */
         $em = $this->get('doctrine.orm.entity_manager');
         $request = $this->get('request');
 
