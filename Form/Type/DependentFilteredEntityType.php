@@ -3,6 +3,7 @@
 namespace Evercode\DependentSelectBundle\Form\Type;
 
 use Evercode\DependentSelectBundle\Form\DataTransformer\EntityToIdTransformer;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -54,7 +55,7 @@ class DependentFilteredEntityType extends AbstractType
      */
     public function getParent()
     {
-        return 'entity';
+        return EntityType::class;
     }
 
     /**

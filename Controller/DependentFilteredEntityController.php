@@ -33,7 +33,7 @@ class DependentFilteredEntityController extends Controller
         $excludedEntityId = $request->get('excluded_entity_id');
         $isTranslationDomainEnabled = $request->get('choice_translation_domain');
         $choiceTitleTranslationPart = $request->get('choice_title_translation_part');
-        $callbackParameters = json_decode($request->get('callback_parameters'), true);
+        $callbackParameters = \json_decode($request->get('callback_parameters'), true);
 
         $entities = $this->get('service_container')->getParameter('dependent_select.dependent_filtered_entities');
         $entity_inf = $entities[$entity_alias];
@@ -166,12 +166,7 @@ class DependentFilteredEntityController extends Controller
                 }
             }
 
-            $optionString = '<option value="%d">%s</option>';
-
-            //auto select first result (if it's enabled in the config.yml)
-            if (($entity_inf['auto_select_first_result'] && $key === 0) || $result->getId() === $selectedResultId) {
-                $optionString = '<option value="%d" selected>%s</option>';
-            }
+            $optionString = '<option value="%s">%s</option>';
 
             $html = $html.sprintf($optionString, $result->getId(), $res);
         }
